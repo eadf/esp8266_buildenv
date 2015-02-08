@@ -16,8 +16,8 @@ This will take several hours to compile.
 * call ~/bin/esp_test.sh and see the project compile & flash. A screen console will be opened as well
 
 
-Why use an underpowered computer as a build platform?
+###Why use an underpowered computer as a build platform?
 * When you are a bit rusty on the electronics, like I am, it feels much safer to only risk a now obsolete Raspberry Pi instead of a $1000 PC. Specially when youre dabbling with [mains power](https://github.com/eadf/esp8266_bitseq).
 * Pi and BB already has the correct 3V3 voltage, no need for any level shifters and crud.
 * The actual development can be done on a 'real' computer, with a full fledged IDE. It's just the flashing part i delegate to the Pi/BB.
-* The Pi and BB has easy access, programmable GPIOs that i use to control relays. These relays temporarily disconnects any hardware from the esp while i flash it.
+* The Pi and BB has easy access, programmable GPIOs that i use to control relays. These relays temporarily disconnects any hardware from the esp while i flash it. So i don't have to manually disconnect any cables each time i want to flash the esp. 
