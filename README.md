@@ -25,8 +25,7 @@ The intention is to be able disconnect the esp8266 from whatever hardware you ar
 The inactive state of the relays connects whatever gadgets you are using to the GPIO0, GPIO2 and RX pins of the esp8266.
 
 #### bypass mode
-The active state of the relays connects GPIO0 and GPIO2 to 3V3 via pullups. Esp8266 RX pin will be connected to the TX pin of the Pi/BB. 
-
+The active state of the relays connects GPIO0 and GPIO2 to 3V3 via pullups. Esp8266 RX pin should be connected to the TX pin of the Pi/BB via a resistor.
 
 Raspberry Pi Pins| Destination
 ----------------|-------------
