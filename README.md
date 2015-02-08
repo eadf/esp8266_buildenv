@@ -19,7 +19,7 @@ This will take several hours to compile.
 * call ~/bin/esp_test.sh and see the project compile & flash. A screen console will be opened as well.
 
 ### Circuit
-The intention is to be able disconnect the esp8266 from whatever hardware you are using, and setting it up so that the esp enters flash mode when the flash script resets it. For this purpose i used some old Arduino relays i had in my junk drawer.
+The intention is to be able to disconnect the esp8266 from whatever hardware you are using, and setting it up so that the esp enters flash mode when the flash script resets it. For this purpose i used some old Arduino relays i had in my junk drawer.
 
 #### normal mode
 The inactive state of the relays connects whatever gadgets you are using to the GPIO0, GPIO2 and RX pins of the esp8266.
@@ -43,8 +43,7 @@ All other esp pins should be connected as per usual (Vcc, GND, CHIP_EN etc etc)
 * The actual development can be done on a 'real' computer, with a full fledged IDE. It's just the flashing part i delegate to the Pi/BB via ssh.
 * The Pi and BB have easy access, programmable GPIOs that i use to control relays. These relays temporarily disconnects any hardware from the esp while i flash it. So i don't have to manually disconnect any cables each time i want to flash the esp. Very useful if you are using the RX pin of the esp as a GPIO.
 
-
 There are lots of other small details i won't get into now. Like:
-* you will have to setup a file share if you want to run a IDE on your local computer. 
+* you will have to setup a file share if you want to run an IDE on your local computer. 
 * Rasbyan uses ttyAMA0 as a console by default, google knows how to disable that.
 * to compile the sdk you will need a few packages installed - use your google-fu
