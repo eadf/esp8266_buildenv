@@ -1,7 +1,7 @@
 # esp8266_buildenv
-Build environment for Raspberry Pi and Beaglebone Black
+Build environment for Raspberry Pi or Beaglebone Black
 
-This is (or will be) the build environment i use to compile, flash and test esp8266 applications on the Pi/BB platforms running linux.
+This is the build environment i use to compile, flash and test esp8266 applications on the Pi/BB platforms running linux.
 
 
 *I don't expect this to be useful for anybody but myself*
@@ -33,6 +33,16 @@ RX (ttyAMA0)    | Esp8266 TX
 TX (ttyAMA0)    | relay
 GPIO.BCM.7      | controls all 3 relays
 GPIO.BCM.8      | Esp8266 Reset
+
+or
+
+Beaglebone Black Pins| Destination
+----------------|-------------
+RX (ttyO0)    | Esp8266 TX
+TX (ttyO0)    | relay
+P9_12      | controls all 3 relays
+P9_14      | Esp8266 Reset
+
 
 All other esp pins should be connected as per usual (Vcc, GND, CHIP_EN etc etc)
 
