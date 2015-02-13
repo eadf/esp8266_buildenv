@@ -1,31 +1,19 @@
 # esp8266_buildenv
-Build environment for Raspberry Pi or Beaglebone Black
+Build environment for Raspberry Pi or Beaglebone Black i also added an arduino pro mini script.
  
-  
-   
-    
-     
-      
-       
-        
-         
-          
-           
-            
- *I don't expect this to be useful for anybody but myself*
  
-  
-   
+ 
+ 
+ 
+ 
 
-
-
-
-
-
-
-
-
-
+ *I don't expect this to be useful for anybody but myself.*
+ 
+ 
+ 
+ 
+ 
+ 
 This is the build environment i use to compile, flash and test esp8266 applications on the Pi/BB platforms running linux.
 
 ### Install
