@@ -11,33 +11,34 @@
 
 SerialCommand serialCmd;   
 
-// Connected from arduino to ESP8266
+const static int IN_1 = 10; // -> 9
+const static int IN_2 = 11; // -> 8
+const static int IN_3 = 12; // -> 7
+const static int IN_4 = 13; // -> 6
+const static int IN_5 = A0; // -> 5
+const static int IN_6 = A1; // -> 4
+const static int IN_7 = A2; // -> 3
+//const static int IN_8 = A3; // -> 2
 
-const static int ESP_GPIO0PIN = 10;
-const static int ESP_GPIO2PIN = 12;
-const static int ESP_CH_PDPIN = 13;
-const static int ESP_RSTPIN = A0;
+const static int OUT_1 = 9;
+const static int OUT_2 = 8;
+const static int OUT_3 = 7;
+const static int OUT_4 = 6;
+const static int OUT_5 = 5;
+const static int OUT_6 = 4;
+const static int OUT_7 = 3;
+//const static int OUT_8 = 2;
 
-// digital pin 2 has a pushbutton attached to it. Give it a name:
-const static int pushButton = 2;
-const static int BYPASS_0_PIN = 3;
-const static int BYPASS_1_PIN = 4;
-const static int BYPASS_2_PIN = 5;
+const static int ESP_RSTPIN = A5;
+const static int RELAY_PIN = A4;  
 
-const static int led1Pin = 9;
-const static int ground1Pin = 8;
-
-const static int led2Pin = 7;
-const static int ground2Pin = 6;
-
-
+const static int pushButton = A3;
 const static int buttonPressFlashPeriod = 1000;
 
 unsigned long timeSample;
 unsigned long startedPressingButtonAt;
 bool lastButtonState = false;
 Debounce debouncer = Debounce( 20 , pushButton);
-
 
 void setup() {  
   cli();//stop interrupts
@@ -59,30 +60,34 @@ void setup() {
 
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
-  // make the pushbutton's pin an input:
+  
+  // make the pushbutton's pin an input with pullup:
   pinMode(pushButton, INPUT_PULLUP);
-  pinMode(led1Pin, OUTPUT);
-  pinMode(ground1Pin, OUTPUT);
-  pinMode(led2Pin, OUTPUT);
-  pinMode(ground2Pin, OUTPUT);
-  pinMode(BYPASS_0_PIN, OUTPUT);
-  pinMode(BYPASS_1_PIN, OUTPUT);
-  pinMode(BYPASS_2_PIN, OUTPUT);
-  digitalWrite(BYPASS_0_PIN,HIGH);
-  digitalWrite(BYPASS_1_PIN,HIGH);
-  digitalWrite(BYPASS_2_PIN,HIGH);
-
-  digitalWrite(led1Pin,true);
-  digitalWrite(ground1Pin,false);
-  digitalWrite(led2Pin,true);
-  digitalWrite(ground2Pin,false);
-  pinMode(ESP_GPIO0PIN, INPUT);
-  pinMode(ESP_GPIO2PIN, INPUT);
+  
+  pinMode(RELAY_PIN, OUTPUT);
+  //digitalWrite(RELAY_PIN,HIGH);
+  analogWrite(RELAY_PIN,255);
+  
+  pinMode(IN_1, INPUT);
+  pinMode(IN_2, INPUT);
+  pinMode(IN_3, INPUT);
+  pinMode(IN_4, INPUT);
+  pinMode(IN_5, INPUT);
+  pinMode(IN_6, INPUT);
+  pinMode(IN_7, INPUT);
+  //pinMode(IN_8, INPUT);
+  
+  pinMode(OUT_1, OUTPUT);
+  pinMode(OUT_2, OUTPUT);
+  pinMode(OUT_3, OUTPUT);
+  pinMode(OUT_4, OUTPUT);
+  pinMode(OUT_5, OUTPUT);
+  pinMode(OUT_6, OUTPUT);
+  pinMode(OUT_7, OUTPUT);
+  //pinMode(OUT_8, OUTPUT);
   
   pinMode(ESP_RSTPIN, OUTPUT);
-  pinMode(ESP_CH_PDPIN, OUTPUT);
-  digitalWrite(ESP_RSTPIN,true);
-  digitalWrite(ESP_CH_PDPIN,true);
+  analogWrite(ESP_RSTPIN,255);
   
   serialCmd.addCommand("flash",flashPulse);  // pulse a flash
   serialCmd.addCommand("reset",resetPulse);  // pulse a reset
@@ -113,12 +118,10 @@ void loop() {
   }
   unsigned long period = millis() - startedPressingButtonAt;
   
-  
   if (!buttonState &&  period > buttonPressFlashPeriod && period < buttonPressFlashPeriod*2) {
     flashPulse();
   }
   
-
   lastButtonState = buttonState;
   delay(1);        // delay in between reads for stability
 }
@@ -126,24 +129,25 @@ void loop() {
 void resetPulse() {
   // Normal reset esp8266
   Serial.print("Pulsing reset "); 
-  digitalWrite(ESP_RSTPIN, LOW);
+  //digitalWrite(ESP_RSTPIN, LOW);
+  analogWrite(ESP_RSTPIN,0);
   delay(100);
-  digitalWrite(ESP_RSTPIN, HIGH);
+  //digitalWrite(ESP_RSTPIN, HIGH);
+  analogWrite(ESP_RSTPIN,255);
   delay(100);
   Serial.println(".. done"); 
 }
 
 void flashPulse() {
-  Serial.print(""); 
-  // Show how we are setting GPIO bits
-  digitalWrite(led1Pin, LOW);
-  digitalWrite(led2Pin, HIGH);
+  Serial.print("Pulsing flash .. start"); 
   bypassModeOn();
   delay(300);
   // Reset esp8266
-  digitalWrite(ESP_RSTPIN, LOW);
+  //digitalWrite(ESP_RSTPIN, LOW);
+  analogWrite(ESP_RSTPIN,0);
   delay(200);
-  digitalWrite(ESP_RSTPIN, HIGH);
+  //digitalWrite(ESP_RSTPIN, HIGH);
+  analogWrite(ESP_RSTPIN,255);
   delay(700);
   
   bypassModeOff();
@@ -152,17 +156,15 @@ void flashPulse() {
 
 void bypassModeOn() {
   Serial.println(" setting bypass mode on"); 
-  digitalWrite(BYPASS_0_PIN,LOW);
-  digitalWrite(BYPASS_1_PIN,LOW);
-  digitalWrite(BYPASS_2_PIN,LOW);
+  //digitalWrite(RELAY_PIN,LOW);
+  analogWrite(RELAY_PIN,0);
   delay(200);
 }
 
 void bypassModeOff() {
   Serial.println(" setting bypass mode off"); 
-  digitalWrite(BYPASS_0_PIN,HIGH);
-  digitalWrite(BYPASS_1_PIN,HIGH);
-  digitalWrite(BYPASS_2_PIN,HIGH);
+  //digitalWrite(RELAY_PIN,HIGH);
+  analogWrite(RELAY_PIN,255);
 }
 
 // This gets set as the default handler, and gets called when no other command matches. 
@@ -171,6 +173,12 @@ void unrecognized() {
 }
 
 ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz 
-  digitalWrite(led1Pin, digitalRead(ESP_GPIO0PIN));
-  digitalWrite(led2Pin, digitalRead(ESP_GPIO2PIN));
+  digitalWrite(OUT_1, digitalRead(IN_1));
+  digitalWrite(OUT_2, digitalRead(IN_2));
+  digitalWrite(OUT_3, digitalRead(IN_3));
+  digitalWrite(OUT_4, digitalRead(IN_4));
+  digitalWrite(OUT_5, digitalRead(IN_5));
+  digitalWrite(OUT_6, digitalRead(IN_6));
+  digitalWrite(OUT_7, digitalRead(IN_7));
+  //digitalWrite(OUT_8, digitalRead(IN_8));
 }
