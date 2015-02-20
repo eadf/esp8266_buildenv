@@ -6,7 +6,7 @@
  *
  */
 
-#include <Debounce.h>
+#include <Bounce2.h>
 #include <SerialCommand.h>
 
 SerialCommand serialCmd;   
@@ -35,10 +35,10 @@ const static int RELAY_PIN = A4;
 const static int pushButton = A3;
 const static int buttonPressFlashPeriod = 1000;
 
-unsigned long timeSample;
-unsigned long startedPressingButtonAt;
-bool lastButtonState = false;
-Debounce debouncer = Debounce( 20 , pushButton);
+bool buttonJustPressed = true;
+
+// Instantiate a Bounce object :
+Bounce debouncer = Bounce(); 
 
 void setup() {  
   cli();//stop interrupts
@@ -63,6 +63,9 @@ void setup() {
   
   // make the pushbutton's pin an input with pullup:
   pinMode(pushButton, INPUT_PULLUP);
+  // After setting up the button, setup the Bounce instance :
+  debouncer.attach(pushButton);
+  debouncer.interval(50);
   
   pinMode(RELAY_PIN, OUTPUT);
   //digitalWrite(RELAY_PIN,HIGH);
@@ -75,7 +78,6 @@ void setup() {
   pinMode(IN_5, INPUT);
   pinMode(IN_6, INPUT);
   pinMode(IN_7, INPUT);
-  //pinMode(IN_8, INPUT);
   
   pinMode(OUT_1, OUTPUT);
   pinMode(OUT_2, OUTPUT);
@@ -84,87 +86,66 @@ void setup() {
   pinMode(OUT_5, OUTPUT);
   pinMode(OUT_6, OUTPUT);
   pinMode(OUT_7, OUTPUT);
-  //pinMode(OUT_8, OUTPUT);
   
   pinMode(ESP_RSTPIN, OUTPUT);
   analogWrite(ESP_RSTPIN,255);
   
-  serialCmd.addCommand("flash",flashPulse);  // pulse a flash
+  serialCmd.addCommand("toggle",toggleRelay);  // toggle relay
   serialCmd.addCommand("reset",resetPulse);  // pulse a reset
   serialCmd.addCommand("bypass",bypassModeOn);  // set bypass mode
   serialCmd.addCommand("normal",bypassModeOff);  // set normal mode
   
   serialCmd.addDefaultHandler(unrecognized); // Handler for command that isn't matched  (says "What?") 
-  timeSample = millis();
 }
   
 // the loop routine runs over and over again forever:
 void loop() {
   
   serialCmd.readSerial();
-  debouncer.update();
-  
-  // read the input pin:
-  bool buttonState = debouncer.read();
-  
-  if (buttonState != lastButtonState) {
-    Serial.print("Button = ");
-    Serial.println(buttonState);
+  debouncer.update(); 
      
-    if (!buttonState) {
-      startedPressingButtonAt = millis();
-      resetPulse();
-    }
-  }
-  unsigned long period = millis() - startedPressingButtonAt;
-  
-  if (!buttonState &&  period > buttonPressFlashPeriod && period < buttonPressFlashPeriod*2) {
-    flashPulse();
+  if(debouncer.fell()) {
+    Serial.print("Button = "); Serial.println(debouncer.read());
+    resetPulse();
+    buttonJustPressed = true; 
   }
   
-  lastButtonState = buttonState;
+  if ((!debouncer.read()) && debouncer.duration() >= buttonPressFlashPeriod && buttonJustPressed) {
+    toggleRelay();
+    buttonJustPressed = false; 
+  }  
   delay(1);        // delay in between reads for stability
 }
 
 void resetPulse() {
   // Normal reset esp8266
   Serial.print("Pulsing reset "); 
-  //digitalWrite(ESP_RSTPIN, LOW);
-  analogWrite(ESP_RSTPIN,0);
+  digitalWrite(ESP_RSTPIN, LOW);
   delay(100);
-  //digitalWrite(ESP_RSTPIN, HIGH);
-  analogWrite(ESP_RSTPIN,255);
+  digitalWrite(ESP_RSTPIN, HIGH);
   delay(100);
   Serial.println(".. done"); 
 }
 
-void flashPulse() {
-  Serial.print("Pulsing flash .. start"); 
-  bypassModeOn();
-  delay(300);
-  // Reset esp8266
-  //digitalWrite(ESP_RSTPIN, LOW);
-  analogWrite(ESP_RSTPIN,0);
-  delay(200);
-  //digitalWrite(ESP_RSTPIN, HIGH);
-  analogWrite(ESP_RSTPIN,255);
-  delay(700);
-  
-  bypassModeOff();
-  Serial.println("Pulsing flash .. done"); 
+void toggleRelay() {
+  Serial.print("Toggle relay .. start");
+  if (!digitalRead(RELAY_PIN)) {
+    bypassModeOff();
+  } else {
+    bypassModeOn();
+  }
+  Serial.println("Toggle relay .. done"); 
 }
 
 void bypassModeOn() {
   Serial.println(" setting bypass mode on"); 
-  //digitalWrite(RELAY_PIN,LOW);
-  analogWrite(RELAY_PIN,0);
+  digitalWrite(RELAY_PIN,LOW);
   delay(200);
 }
 
 void bypassModeOff() {
   Serial.println(" setting bypass mode off"); 
-  //digitalWrite(RELAY_PIN,HIGH);
-  analogWrite(RELAY_PIN,255);
+  digitalWrite(RELAY_PIN,HIGH);
 }
 
 // This gets set as the default handler, and gets called when no other command matches. 
@@ -180,5 +161,4 @@ ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz
   digitalWrite(OUT_5, digitalRead(IN_5));
   digitalWrite(OUT_6, digitalRead(IN_6));
   digitalWrite(OUT_7, digitalRead(IN_7));
-  //digitalWrite(OUT_8, digitalRead(IN_8));
 }
