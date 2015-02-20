@@ -1,18 +1,7 @@
 # esp8266_buildenv
 Build environment for Raspberry Pi or Beaglebone Black i also added an arduino pro mini script.
  
- 
- 
- 
- 
- 
-
- *I don't expect this to be useful for anybody but myself.*
- 
- 
- 
- 
- 
+ **I don't expect this to be useful for anybody but myself.**
  
 This is the build environment i use to compile, flash and test esp8266 applications on the Pi/BB platforms running linux.
 
@@ -39,7 +28,7 @@ The active state of the relays connects GPIO0 and GPIO2 to 3V3 via pullups. Esp8
 Raspberry Pi Pins| Destination
 ----------------|-------------
 RX (ttyAMA0)    | Esp8266 TX
-TX (ttyAMA0)    | relay
+TX (ttyAMA0)    | relay input -> esp RX 
 GPIO.BCM.7      | controls all 3 relays
 GPIO.BCM.8      | Esp8266 Reset
 
@@ -48,7 +37,7 @@ or
 Beaglebone Black Pins| Destination
 ----------------|-------------
 RX (ttyO0)    | Esp8266 TX
-TX (ttyO0)    | relay
+TX (ttyO0)    | relay input -> esp RX
 P9_12      | controls all 3 relays
 P9_14      | Esp8266 Reset
 
