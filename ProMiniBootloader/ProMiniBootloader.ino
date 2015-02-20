@@ -105,7 +105,6 @@ void loop() {
   debouncer.update(); 
      
   if(debouncer.fell()) {
-    Serial.print("Button = "); Serial.println(debouncer.read());
     resetPulse();
     buttonJustPressed = true; 
   }
@@ -114,7 +113,7 @@ void loop() {
     toggleRelay();
     buttonJustPressed = false; 
   }  
-  delay(1);        // delay in between reads for stability
+  delay(1); // delay in between reads for stability
 }
 
 void resetPulse() {
@@ -141,6 +140,10 @@ void bypassModeOn() {
   Serial.println(" setting bypass mode on"); 
   digitalWrite(RELAY_PIN,LOW);
   delay(200);
+  digitalWrite(ESP_RSTPIN, LOW);
+  delay(100);
+  digitalWrite(ESP_RSTPIN, HIGH);
+  delay(100);
 }
 
 void bypassModeOff() {
